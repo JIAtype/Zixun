@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<link rel="stylesheet" type="text/css" href="/css/bootstrap.css">
+<link rel="stylesheet" type="text/css" href="/css/management.css">
+<script th:src="@{/js/animeManagement.js}" th:inline="javascript"></script>
+
+<head>
+	<title>Anime Management</title>
+</head>
+
+<body>
+	<!-- 导航栏 -->
+	<div class="container-fluid">
+		<span class="logo"><a th:href="@{'/user/homePage'}">AniRec </a></span>
+		<span><a class="nav_title" th:href="@{'/animes/management'}">Anime </a></span>
+		<span><a class="nav_title" th:href="@{'/animetags/management'}">Tags </a></span>
+		<span><a class="nav_title" th:href="@{'/users/management'}">Role </a></span>
+		<span><a class="nav_title" th:href="@{'/comments/management'}">Comment </a></span>
+		<span><a class="nav_title" th:href="@{'/blacklists/management'}">Forbidden Words </a></span>
+		<span><a class="nav_title2" th:href="@{'/user/logout'}">Log out </a></span>
+	</div>
+
+	<div class="container">
+		<label class="page_title">Anime Management</label>
+		<div class="searchBar">
+			<input class="nicknameTxt" id="name" type="text" placeholder="Name">
+			<button id="searchButton" class="searchBtn" type="submit">Search</button>
+			<button class="resetBtn" type="button" onclick="resetSearch()">Reset</button>
+			<button class="addBtn" id="addBtn" type="submit" onclick="openAddAnimeModel()">Add</button>
+		</div>
+		<div class="row">
+			<div class="col-md-11">
+				<form id="commentTable" action="/management" method="post">
+					<table class="table table-bordered table-hover">
+						<tr>
+							<th style="width:100px">Index</th>
+							<th style="width:220px">Name</th>
+							<th style="width:100px">Rating</th>
+							<th style="width:100px">Followed</th>
+							<th style="width:100px">Favourites</th>
+							<th style="width:100px">Release data</th>
+							<th style="width:150px">Operate</th>
+						</tr>
+						<tr th:each="anime : ${animes}">
+							<td th:text="${anime.id}">Index</td>
+							<td th:text="${anime.name}">Name</td>
+							<td th:text="${anime.averageRating}">Rating</td>
+							<td th:text="${anime.followed}">Followed</td>
+							<td th:text="${anime.favorites}">Favourites</td>
+							<td th:text="${#temporals.format(anime.releaseDate, 'yyyy-MM-dd')}">Release data</td>
+							<td>
+								<button onclick="editWindow(event)" class="editBtn">Edit</button>
+								<button onclick="deleteWindow(event)" class="deleteBtn">Delete</button>
+							</td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<!-- 添加弹窗 -->
+	<div class="overlay" id="overlay"></div>
+	<div class="addWindow" id="addWindow">
+		<div class="topBar">
+			<label>Add Anime</label>
+		</div>
+		<form id="addAnimeForm">
+			<label for="name">Name:</label>
+			<input type="text" id="addAnimeName" name="name"><br><br>
+			<label for="cover">Cover:</label>
+			<input type="text" id="cover" name="cover"><br><br>
+			<label for="description">Description:</label><br>
+			<textarea id="description" name="description" rows="4" cols="50"></textarea><br><br>
+			<label for="averageRating">Rating:</label>
+			<input type="text" id="averageRating" name="averageRating"><br><br>
+			<label for="releaseDate">ReleaseDate:</label>
+			<select id="year"></select>
+			<select id="month"></select>
+			<select id="day"></select><br><br>
+			<label for="episodes">Episodes:</label>
+			<input type="text" id="episodes" name="episodes"><br><br>
+			<label for="director">Director:</label>
+			<input type="text" id="director" name="director"><br><br>
+			<label for="script">Script:</label>
+			<input type="text" id="script" name="script"><br><br>
+			<label for="characterDesign">CharacterDesign:</label>
+			<input type="text" id="characterDesign" name="characterDesign"><br><br>
+			<label for="sakugaDirector">SakugaDirector:</label>
+			<input type="text" id="sakugaDirector" name="sakugaDirector"><br><br>
+			<label for="productionCompany">ProductionCompany:</label>
+			<input type="text" id="productionCompany" name="productionCompany"><br><br>
+			<div class="operationBtns">
+				<button type="submit" id="addSubmitBtn" onclick="addAnime()">Submit</button>
+				<button onclick="closeAddAnimeModel()" id="addCancelBtn" class="cancelBtn">Cancel</button>
+			</div>
+		</form>
+	</div>
+
+	<!-- 删除弹窗 -->
+	<div class="overlay" id="overlay"></div>
+	<div class="deleteWindow" id="deleteWindow">
+		<div class="topBar">
+			<label style="font-size:18px; font-weight:bold; margin-left:25px; margin-top:15px">Tips</label>
+		</div>
+		<p style="font-size:18px; margin-left:80px; margin-top:50px">This anime will be deleted</p>
+		<p style="font-size:16px; font-weight:bold; color:#797979; margin-left:80px">Notice：“Unable to recover after
+			deletion, please operate with caution!”</p>
+		<div class="operationBtns">
+			<button onclick="confirm()" class="confirmBtn">Confirm</button>
+			<button onclick="cancel()" class="cancelBtn">Cancel</button>
+		</div>
+	</div>
+
+	<!-- 编辑弹窗 -->
+	<div class="overlay" id="editOverlay"></div>
+	<div class="editWindow" id="editWindow">
+		<span class="close" onclick="closeEditAnimeModal()">&times;</span>
+		<div class="topBar">
+			<label>Edit Anime</label>
+		</div>
+		<form id="editAnimeForm">
+			<label for="editName">Name:</label>
+			<input type="text" id="editName" name="editName"><br><br>
+			<label for="editCover">Cover:</label>
+			<input type="text" id="editCover" name="editCover"><br><br>
+			<label for="editDescription">Description:</label><br>
+			<textarea id="editDescription" name="editDescription" rows="4" cols="50"></textarea><br><br>
+			<label for="editAverageRating">Rating:</label>
+			<input type="text" id="editAverageRating" name="editAverageRating"><br><br>
+			<label for="editReleaseDate">ReleaseDate:</label>
+			<select id="year"></select>
+			<select id="month"></select>
+			<select id="day"></select><br><br>
+			<label for="editEpisodes">Episodes:</label>
+			<input type="text" id="editEpisodes" name="editEpisodes"><br><br>
+			<label for="editDirector">Director:</label>
+			<input type="text" id="editDirector" name="editDirector"><br><br>
+			<label for="editScript">Script:</label>
+			<input type="text" id="editScript" name="editScript"><br><br>
+			<label for="editCharacterDesign">CharacterDesign:</label>
+			<input type="text" id="editCharacterDesign" name="editCharacterDesign"><br><br>
+			<label for="editSakugaDirector">SakugaDirector:</label>
+			<input type="text" id="editSakugaDirector" name="editSakugaDirector"><br><br>
+			<label for="editProductionCompany">ProductionCompany:</label>
+			<input type="text" id="editProductionCompany" name="editProductionCompany"><br><br>
+			<div class="operationBtns">
+				<button type="submit" onclick="updateAnime()">Update</button>
+				<button onclick="cancelEdit()" class="cancelBtn">Cancel</button>
+			</div>
+		</form>
+	</div>
+
+
+</body>
+
+</html>

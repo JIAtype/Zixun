@@ -1,0 +1,88 @@
+document.addEventListener('DOMContentLoaded', function() {
+	searchByName();
+
+	var addBtn = document.getElementById('addBtn');
+	addBtn.addEventListener('click', function() {
+		openAddAnimeModel();
+	});
+
+	var addSubmitBtn = document.getElementById('addSubmitBtn');
+	addSubmitBtn.addEventListener('click', function() {
+		addAnime();
+	});
+});
+
+function searchByName() {
+	var searchButton = document.getElementById('searchButton');
+	searchButton.addEventListener('click', function() {
+		var name = document.getElementById('name').value;
+
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', '/animes/search?name=' + name, true);
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState === 4) {
+				if (xhr.status === 200) {
+					var parser = new DOMParser();
+					var doc = parser.parseFromString(xhr.responseText, 'text/html');
+					var tableFragment = doc.querySelector('#commentTable table');
+					var commentTable = document.getElementById('commentTable');
+					commentTable.innerHTML = '';
+					commentTable.appendChild(tableFragment);
+				} else {
+					console.error('Error occurred while processing the search request.');
+				}
+			}
+		};
+		xhr.send();
+	});
+}
+
+function resetSearch() {
+	var nameInput = document.getElementById('name');
+	if (nameInput) {
+		nameInput.value = '';
+	}
+}
+
+window.onload = function() {
+	var year = document.getElementById("year");
+	var month = document.getElementById("month");
+	var day = document.getElementById("day");
+
+	for (var i = 1949; i < 2018; i++) {
+		var opt = document.createElement("option");
+		opt.value = i;
+		opt.innerText = i;
+		year.appendChild(opt);
+	}
+
+	for (var i = 1; i < 13; i++) {
+		var opt = document.createElement("option");
+		opt.value = i;
+		opt.innerText = i;
+		month.appendChild(opt);
+	}
+
+	for (var i = 1; i < 32; i++) {
+		var opt = document.createElement("option");
+		opt.value = i;
+		opt.innerText = i;
+		day.appendChild(opt);
+	}
+}
+
+function openAddAnimeModel() {
+	var addWindow = document.getElementById('addWindow');
+	var overlay = document.getElementById('overlay');
+
+	addWindow.style.display = 'block';
+	overlay.style.display = 'block';
+}
+
+function closeAddAnimeModel() {
+	var addWindow = document.getElementById('addWindow');
+	var overlay = document.getElementById('overlay');
+
+	addWindow.style.display = 'none';
+	overlay.style.display = 'none';
+}
